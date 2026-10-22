@@ -183,6 +183,102 @@ summary:focus-visible {
   text-align: center;
 }
 
+.notice {
+  margin: 4px 0 12px;
+  padding: 11px 14px;
+  border: 1px solid rgba(10, 132, 255, 0.22);
+  border-radius: 16px;
+  background: rgba(10, 132, 255, 0.08);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.notice p {
+  margin: 0;
+}
+
+.notice p + p {
+  margin-top: 2px;
+  color: var(--muted);
+}
+
+.notice strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.identity {
+  margin-bottom: 16px;
+  padding: 12px 14px 11px;
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.identity-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.identity-hint {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.identity-fields {
+  display: grid;
+  grid-template-columns: 0.9fr 1.3fr;
+  gap: 10px;
+}
+
+.mini-field > span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.mini-field input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--fill);
+  font-size: 16px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.mini-field input:focus {
+  border-color: var(--accent);
+  background: var(--card);
+}
+
+.filename-hint {
+  margin: 8px 1px 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+#filenamePreview.ready {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.identity + .empty {
+  padding-top: 22px;
+}
+
 .empty {
   padding: clamp(36px, 9vh, 76px) 8px 32px;
   text-align: center;

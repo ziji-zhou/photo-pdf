@@ -29,7 +29,9 @@ const els = {
   generateBtn: $("#generateBtn"),
   quality: $("#quality"),
   orientation: $("#orientation"),
-  filename: $("#filename"),
+  studentId: $("#studentId"),
+  studentName: $("#studentName"),
+  filenamePreview: $("#filenamePreview"),
   processing: $("#processing"),
   progressText: $("#progressText"),
   progressBar: $("#progressBar"),
@@ -62,7 +64,7 @@ init();
 function init() {
   bindEvents();
   restoreSettings();
-  els.filename.value = defaultFilename();
+  restoreStudent();
   updateView();
   setupPwa();
   showEnvironmentTip();
@@ -91,6 +93,8 @@ function bindEvents() {
 
   els.quality.addEventListener("change", saveSettings);
   els.orientation.addEventListener("change", saveSettings);
+  els.studentId.addEventListener("input", onStudentChange);
+  els.studentName.addEventListener("input", onStudentChange);
 
   els.list.addEventListener("click", onListClick);
 
@@ -320,6 +324,15 @@ function onListClick(event) {
 async function generatePdf() {
   if (!state.items.length) return;
 
+  const { id, name: studentName } = readStudent();
+  if (!id || !studentName) {
+    toast("请先填写学号和姓名，PDF 会用它们命名");
+    const target = !id ? els.studentId : els.studentName;
+    target.focus();
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+
   const preset = QUALITY_PRESETS[els.quality.value] || QUALITY_PRESETS.standard;
   els.generateBtn.disabled = true;
   showProcessing(`正在处理 0/${state.items.length} 张`, 0);
@@ -341,7 +354,7 @@ async function generatePdf() {
     updateProcessing("正在合成 PDF…", 0.98);
     await nextFrame();
 
-    const name = sanitizeFilename(els.filename.value) || defaultFilename();
+    const name = currentPdfName() || defaultFilename();
     const blob = buildPdf(pages, {
       title: name,
       autoOrientation: els.orientation.value !== "portrait",
@@ -522,6 +535,48 @@ function canvasToBlob(canvas, type, quality) {
       reject(error);
     }
   });
+}
+
+function readStudent() {
+  return {
+    id: els.studentId.value.trim().replace(/\s+/g, " "),
+    name: els.studentName.value.trim().replace(/\s+/g, " "),
+  };
+}
+
+function currentPdfName() {
+  const { id, name } = readStudent();
+  return id && name ? sanitizeFilename(`${id} ${name}`) : "";
+}
+
+function updateFilenamePreview() {
+  const name = currentPdfName();
+  els.filenamePreview.textContent = name
+    ? `${name}.pdf`
+    : "填写学号和姓名后自动生成";
+  els.filenamePreview.classList.toggle("ready", Boolean(name));
+}
+
+function onStudentChange() {
+  updateFilenamePreview();
+  try {
+    localStorage.setItem("photoPdfStudent", JSON.stringify(readStudent()));
+  } catch (_) {
+    // 无痕模式或禁用存储时忽略
+  }
+}
+
+function restoreStudent() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("photoPdfStudent") || "null");
+    if (saved) {
+      els.studentId.value = saved.id || "";
+      els.studentName.value = saved.name || "";
+    }
+  } catch (_) {
+    // 忽略损坏的本地数据
+  }
+  updateFilenamePreview();
 }
 
 function defaultFilename() {

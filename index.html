@@ -26,6 +26,29 @@
     </header>
 
     <main>
+      <aside class="notice" role="note">
+        <p><strong>本网站由周子济设计</strong>，仅限数学国际班同学使用。</p>
+        <p>有问题请联系：<strong>2602 周子济</strong></p>
+      </aside>
+
+      <section class="identity" aria-labelledby="identityTitle">
+        <div class="identity-head">
+          <span id="identityTitle">提交人</span>
+          <span class="identity-hint">用于给 PDF 命名</span>
+        </div>
+        <div class="identity-fields">
+          <label class="mini-field">
+            <span>学号</span>
+            <input id="studentId" type="text" inputmode="numeric" autocomplete="off" placeholder="如 56">
+          </label>
+          <label class="mini-field">
+            <span>姓名</span>
+            <input id="studentName" type="text" autocomplete="name" placeholder="如 周子济">
+          </label>
+        </div>
+        <p class="filename-hint">PDF 文件名：<span id="filenamePreview">填写学号和姓名后自动生成</span></p>
+      </section>
+
       <section id="empty" class="empty">
         <div class="empty-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>
@@ -41,13 +64,9 @@
         <details class="settings">
           <summary>
             <span>输出设置</span>
-            <span class="summary-hint">文件名 · 清晰度 · 方向</span>
+            <span class="summary-hint">清晰度 · 页面方向</span>
           </summary>
           <div class="settings-body">
-            <label class="field">
-              <span>文件名</span>
-              <input id="filename" type="text" inputmode="text" autocomplete="off" placeholder="作业">
-            </label>
             <div class="field-row">
               <label class="field">
                 <span>清晰度</span>
