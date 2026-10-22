@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f2f2f7">
+  <title>照片转 PDF</title>
+  <meta name="description" content="从手机相册选择照片，排序后在本地生成 PDF。照片不会上传服务器。">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="照片转PDF">
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1>照片转 PDF</h1>
+        <p class="subtitle">相册选图 · 排序 · 本机生成</p>
+      </div>
+      <button id="clearBtn" class="text-btn" type="button" hidden>清空</button>
+    </header>
+
+    <main>
+      <aside class="notice" role="note">
+        <p><strong>本网站由周子济设计</strong>，仅限数学国际班同学使用。</p>
+        <p>有问题请联系：<strong>2602 周子济</strong></p>
+      </aside>
+
+      <section class="identity" aria-labelledby="identityTitle">
+        <div class="identity-head">
+          <span id="identityTitle">提交人</span>
+          <span class="identity-hint">用于给 PDF 命名</span>
+        </div>
+        <div class="identity-fields">
+          <label class="mini-field">
+            <span>学号</span>
+            <input id="studentId" type="text" inputmode="numeric" autocomplete="off" placeholder="如 56">
+          </label>
+          <label class="mini-field">
+            <span>姓名</span>
+            <input id="studentName" type="text" autocomplete="name" placeholder="如 周子济">
+          </label>
+        </div>
+        <p class="filename-hint">PDF 文件名：<span id="filenamePreview">填写学号和姓名后自动生成</span></p>
+      </section>
+
+      <section id="empty" class="empty">
+        <div class="empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>
+        </div>
+        <h2>把照片变成一份 PDF</h2>
+        <p class="empty-text">从相册一次选多张，调整顺序后生成 A4 PDF。所有处理都在本机完成，照片不会上传。</p>
+        <button id="pickBtn" class="primary big" type="button">从相册选择照片</button>
+        <button id="installBtn" class="text-btn install" type="button" hidden>安装到桌面</button>
+        <p class="tiny">支持 JPG / PNG；iPhone 选图时会自动转换 HEIC。</p>
+      </section>
+
+      <section id="content" hidden>
+        <details class="settings">
+          <summary>
+            <span>输出设置</span>
+            <span class="summary-hint">清晰度 · 页面方向</span>
+          </summary>
+          <div class="settings-body">
+            <div class="field-row">
+              <label class="field">
+                <span>清晰度</span>
+                <select id="quality">
+                  <option value="compact">压缩（文件小）</option>
+                  <option value="standard" selected>标准（推荐）</option>
+                  <option value="high">高清（文件大）</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>页面方向</span>
+                <select id="orientation">
+                  <option value="auto" selected>自动</option>
+                  <option value="portrait">全部纵向</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </details>
+
+        <div class="list-head">
+          <span id="listTitle">照片</span>
+          <button id="addBtn" class="text-btn" type="button">＋ 添加</button>
+        </div>
+
+        <div id="list" class="list"></div>
+
+        <p class="hint">“拆成两页”用于一张照片拍到左右两页的情况。用 ↑ ↓ 调整先后顺序。</p>
+      </section>
+    </main>
+  </div>
+
+  <div id="bottomBar" class="bottom-bar" hidden>
+    <div class="page-count">共 <strong id="pageCount">0</strong> 页</div>
+    <button id="generateBtn" class="primary" type="button">生成 PDF</button>
+  </div>
+
+  <input id="fileInput" type="file" accept="image/*" multiple hidden>
+
+  <div id="processing" class="overlay" hidden>
+    <div class="overlay-card">
+      <div class="spinner" aria-hidden="true"></div>
+      <p id="progressText" class="progress-text">正在处理…</p>
+      <div class="progress"><div id="progressBar"></div></div>
+    </div>
+  </div>
+
+  <div id="resultOverlay" class="overlay" hidden>
+    <div class="overlay-card result-card">
+      <div class="result-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h3>PDF 已生成</h3>
+      <p id="resultMeta" class="result-meta">共 0 页</p>
+      <button id="shareBtn" class="primary wide" type="button" hidden>分享 PDF 文件</button>
+      <a id="downloadBtn" class="secondary wide" download>另存到手机</a>
+      <button id="closeResultBtn" class="text-btn wide" type="button">返回编辑</button>
+      <p id="resultTip" class="tiny">点「分享 PDF 文件」发送的就是文件本身，不会带网页链接。</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div id="iosTip" class="ios-tip" hidden>
+    <span>点浏览器的分享按钮 →「添加到主屏幕」，以后可像 App 一样打开。</span>
+    <button id="dismissTip" type="button" aria-label="关闭提示">×</button>
+  </div>
+
+  <noscript>
+    <p class="noscript">这个工具需要启用 JavaScript 才能生成 PDF。</p>
+  </noscript>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
