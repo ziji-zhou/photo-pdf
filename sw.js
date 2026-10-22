@@ -1,4 +1,4 @@
-const CACHE = "photo-pdf-v7";
+const CACHE = "photo-pdf-v8";
 
 const ASSETS = [
   "./",
