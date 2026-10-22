@@ -622,6 +622,9 @@ summary:focus-visible {
 .overlay-card {
   width: 100%;
   max-width: 340px;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 26px 22px 20px;
   border-radius: 22px;
   background: var(--card);
