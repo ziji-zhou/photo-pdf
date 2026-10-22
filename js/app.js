@@ -39,6 +39,7 @@ const els = {
   resultMeta: $("#resultMeta"),
   downloadBtn: $("#downloadBtn"),
   shareBtn: $("#shareBtn"),
+  resultTip: $("#resultTip"),
   closeResultBtn: $("#closeResultBtn"),
   toast: $("#toast"),
   iosTip: $("#iosTip"),
@@ -442,6 +443,9 @@ function showResult(blob, filename, pageCount) {
   els.shareBtn.hidden = !canShare;
   els.downloadBtn.className = canShare ? "secondary wide" : "primary wide";
   els.downloadBtn.textContent = canShare ? "另存到手机" : "保存 / 下载";
+  els.resultTip.textContent = canShare
+    ? "点「分享 PDF 文件」发送的就是文件本身，不会带网页链接。"
+    : "当前是测试地址，浏览器不支持直接分享文件。请用部署后的 HTTPS 网址；或先保存到「文件」App，再从文件 App 分享。";
 
   els.resultOverlay.hidden = false;
   document.body.classList.add("locked");
