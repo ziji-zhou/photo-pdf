@@ -459,7 +459,8 @@ async function sharePdf() {
   });
 
   try {
-    await navigator.share({ files: [file], title: state.lastPdf.name });
+    // 只传文件本身，不传 title / url，免得分享面板里多出一条链接。
+    await navigator.share({ files: [file] });
   } catch (error) {
     if (error && error.name !== "AbortError") {
       toast("分享失败，请用“保存 / 下载”");
