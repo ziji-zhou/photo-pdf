@@ -91,6 +91,7 @@ function bindEvents() {
   els.generateBtn.addEventListener("click", generatePdf);
   els.closeResultBtn.addEventListener("click", closeResult);
   els.shareBtn.addEventListener("click", sharePdf);
+  els.downloadBtn.addEventListener("click", savePdf);
 
   els.quality.addEventListener("change", saveSettings);
   els.orientation.addEventListener("change", saveSettings);
@@ -424,6 +425,22 @@ async function renderItemPages(item, preset) {
 
 /* ---------------- 结果、分享、下载 ---------------- */
 
+function isIOSDevice() {
+  const ua = navigator.userAgent || "";
+  return (
+    /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+function canShareFile(file) {
+  try {
+    return Boolean(navigator.canShare && navigator.canShare({ files: [file] }));
+  } catch (_) {
+    return false;
+  }
+}
+
 function showResult(blob, filename, pageCount) {
   state.lastPdf = { blob, name: filename };
 
@@ -435,17 +452,28 @@ function showResult(blob, filename, pageCount) {
   els.resultMeta.textContent = `共 ${pageCount} 页 · ${formatSize(blob.size)}`;
 
   const file = new File([blob], filename, { type: "application/pdf" });
-  const canShare = Boolean(
-    navigator.canShare && navigator.canShare({ files: [file] })
-  );
+  const canShare = canShareFile(file);
+  const ios = isIOSDevice();
 
   // 能调起系统分享时，默认只分享、不落盘；保存是用户主动选的次要操作。
   els.shareBtn.hidden = !canShare;
   els.downloadBtn.className = canShare ? "secondary wide" : "primary wide";
-  els.downloadBtn.textContent = canShare ? "另存到手机" : "保存 / 下载";
-  els.resultTip.textContent = canShare
-    ? "点「分享 PDF 文件」发送的就是文件本身，不会带网页链接。"
-    : "当前是测试地址，浏览器不支持直接分享文件。请用部署后的 HTTPS 网址；或先保存到「文件」App，再从文件 App 分享。";
+  els.downloadBtn.textContent =
+    ios && canShare ? "保存到文件" : canShare ? "另存到手机" : "保存 / 下载";
+
+  if (ios && canShare) {
+    els.resultTip.textContent =
+      "保存：点「保存到文件」→ 在弹出面板里选「存储到文件」。点「分享 PDF 文件」发送的是文件本身，不会带链接。";
+  } else if (canShare) {
+    els.resultTip.textContent =
+      "点「分享 PDF 文件」发送的就是文件本身，不会带网页链接。";
+  } else if (ios) {
+    els.resultTip.textContent =
+      "当前地址不支持直接分享文件。点「保存 / 下载」打开预览后，点分享 →「存储到文件」。";
+  } else {
+    els.resultTip.textContent =
+      "当前是测试地址，浏览器不支持直接分享文件。请用部署后的 HTTPS 网址；或先保存到「文件」App，再从文件 App 分享。";
+  }
 
   els.resultOverlay.hidden = false;
   document.body.classList.add("locked");
@@ -470,6 +498,47 @@ async function sharePdf() {
       toast("分享失败，请用“保存 / 下载”");
     }
   }
+}
+
+async function savePdf(event) {
+  event.preventDefault();
+  if (!state.lastPdf) return;
+
+  const file = new File([state.lastPdf.blob], state.lastPdf.name, {
+    type: "application/pdf",
+  });
+
+  // iOS Safari 和主屏幕 App 不保证把 blob 直接下载到「文件」。
+  // 系统分享面板里的「存储到文件」才是最稳的保存入口。
+  if (isIOSDevice() && canShareFile(file)) {
+    try {
+      await navigator.share({ files: [file] });
+    } catch (error) {
+      if (error && error.name !== "AbortError") {
+        toast("保存失败，请改用「分享 PDF 文件」");
+      }
+    }
+    return;
+  }
+
+  if (isIOSDevice()) {
+    // 没有分享 API（例如 http 测试地址）时，打开 PDF 预览让用户手动保存。
+    const opened = window.open(state.resultUrl, "_blank");
+    if (opened) {
+      toast("在打开的 PDF 里点分享 →「存储到文件」", 6000);
+    } else {
+      toast("请允许弹出窗口，或改用「分享 PDF 文件」");
+    }
+    return;
+  }
+
+  // Android / 桌面浏览器：正常触发下载。
+  const a = document.createElement("a");
+  a.href = state.resultUrl;
+  a.download = state.lastPdf.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 
 /* ---------------- 图片解码与工具 ---------------- */
@@ -669,14 +738,11 @@ function saveSettings() {
 
 function showEnvironmentTip() {
   const ua = navigator.userAgent || "";
-  const isIOS =
-    /iPad|iPhone|iPod/.test(ua) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const standalone =
     window.navigator.standalone === true ||
     window.matchMedia("(display-mode: standalone)").matches;
 
-  if (isIOS && !standalone && !localStorage.getItem("photoPdfTipDismissed")) {
+  if (isIOSDevice() && !standalone && !localStorage.getItem("photoPdfTipDismissed")) {
     els.iosTip.hidden = false;
   }
 
