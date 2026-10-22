@@ -35,21 +35,18 @@ HTTPS（localhost 除外）。要长期使用，按下面的方法部署。
 
 ## 部署到 GitHub Pages
 
-仓库里的 `.github/workflows/deploy.yml` 会在每次 push 到 `main` 时自动发布。
+线上地址：<https://ziji-zhou.github.io/photo-pdf/>
 
-1. 在 GitHub 新建一个 **public** 仓库，例如 `photo-pdf`（不要勾选初始化 README）。
-2. 把这个目录推上去（SSH 方式）：
+网站发布在 `gh-pages` 分支。每次 push 到 `main` 后，
+`.github/workflows/deploy.yml` 会把静态文件同步到 `gh-pages`，Pages 再从该分支发布。
 
-   ```bash
-   cd ~/Desktop/photo-pdf
-   git remote add origin git@github.com:<你的用户名>/photo-pdf.git
-   git push -u origin main
-   ```
+仓库的 Pages 设置应保持为：
 
-3. 打开仓库的 Actions 页面，等 “Deploy to GitHub Pages” 跑完。
-   工作流会尝试自动开启 Pages；如果提示没有权限，就到
-   Settings → Pages → Build and deployment → Source 选 **GitHub Actions**，再重跑一次。
-4. 网址是 `https://<你的用户名>.github.io/photo-pdf/`。
+- Build and deployment → Source：**Deploy from a branch**
+- Branch：**gh-pages** → **/ (root)**
+
+如果 Actions 不可用，也可以在本地手动同步：把 `index.html`、`css/`、`js/`、`icons/`、
+`manifest.webmanifest`、`sw.js` 和空的 `.nojekyll` 提交到 `gh-pages` 分支后推送。
 
 ## 实现说明
 
@@ -65,4 +62,6 @@ HTTPS（localhost 除外）。要长期使用，按下面的方法部署。
 - 三星等部分安卓机的 HEIC 照片，如果浏览器自己解不了，会提示无法读取；
   可以先用系统相册另存为 JPG。
 - iOS 微信内置浏览器不能安装到桌面，分享也受限，请用 Safari 打开。
+- iOS 分享面板只列出支持该文件类型的 App。QQ/微信不一定接收系统分享出来的 PDF，
+  这时先「另存到手机」存进「文件」App，再从聊天窗口的「+ → 文件」发送。
 - 一次处理很多张高清照片会占内存，建议单次不超过 30 张；不够可分批生成。
