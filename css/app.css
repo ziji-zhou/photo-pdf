@@ -160,6 +160,7 @@ summary:focus-visible {
   color: var(--text);
   font-size: 15.5px;
   font-weight: 600;
+  text-decoration: none;
 }
 
 .secondary:active {

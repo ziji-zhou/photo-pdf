@@ -421,9 +421,14 @@ function showResult(blob, filename, pageCount) {
   els.resultMeta.textContent = `共 ${pageCount} 页 · ${formatSize(blob.size)}`;
 
   const file = new File([blob], filename, { type: "application/pdf" });
-  els.shareBtn.hidden = !(
+  const canShare = Boolean(
     navigator.canShare && navigator.canShare({ files: [file] })
   );
+
+  // 能调起系统分享时，默认只分享、不落盘；保存是用户主动选的次要操作。
+  els.shareBtn.hidden = !canShare;
+  els.downloadBtn.className = canShare ? "secondary wide" : "primary wide";
+  els.downloadBtn.textContent = canShare ? "另存到手机" : "保存 / 下载";
 
   els.resultOverlay.hidden = false;
   document.body.classList.add("locked");
